@@ -1,12 +1,43 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres-latest
+  db:
     container_name: task-management-api-db
+    image: postgres:17
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: task-management-api
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345678
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - estudos
+
+  db_init:
+    image: postgres:17
+    container_name: sso_db_init
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./prisma/database/schema.sql:/schema.sql
+    command: >
+      bash -c "
+        until pg_isready -h db -p 5432; do
+          sleep 1;
+        done;
+        TABLES_COUNT=\$(psql -h db -U \$POSTGRES_USER -d \$POSTGRES_DB -t -c \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';\");
+        if [ \${TABLES_COUNT} -eq 0 ]; then
+          psql -h db -U \$POSTGRES_USER -d \$POSTGRES_DB -f /schema.sql;
+        fi
+      "
+    networks:
+      - estudos
+    restart: "no"
+volumes:
+  postgres_data:
+
+networks:
+  estudos:
