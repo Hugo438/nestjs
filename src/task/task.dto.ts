@@ -10,7 +10,7 @@ import {
 
 export enum TaskStatusEnum {
   TO_DO = 'TO_DO',
-  IN_PROGRESS = 'IN_PORGRESS',
+  IN_PROGRESS = 'IN_PROGRESS',
   DONE = 'DONE',
 }
 export class TaskDto {
@@ -40,4 +40,9 @@ export interface FindAllParameters {
   title: string;
   description: string;
   status: string;
+}
+
+export class TaskRouteParameters {
+  @IsUUID()
+  id: string;
 }
