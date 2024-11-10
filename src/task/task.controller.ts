@@ -9,9 +9,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { FindAllParameters, TaskDto } from './task.dto';
+import { FindAllParameters, TaskDto, TaskStatusEnum } from './task.dto';
 import { TaskService } from './task.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { v4 as uuid } from 'uuid';
 
 @UseGuards(AuthGuard)
 @Controller('task')
@@ -20,6 +21,9 @@ export class TaskController {
 
   @Post()
   create(@Body() task: TaskDto) {
+    task.id = uuid();
+    task.status = TaskStatusEnum.TO_DO;
+
     this.taskService.create(task);
   }
 
